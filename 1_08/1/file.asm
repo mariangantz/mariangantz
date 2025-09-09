@@ -21,9 +21,8 @@ main:
     ; is higher that 0, or "The number <nr> is negative", otherwise.
     
     ; The weird array has 8 bytes: "byteme\n\0"
-    ; Middle would be at index 3-4 for a 32-bit integer
-    ; Load the 32-bit integer from offset 3
-    mov eax, dword [weird + 3]
+    ; Middle 32-bit integer starts at offset 2 (bytes 2-5: 't','e','m','e')
+    mov eax, dword [weird + 2]
     
     ; Check if positive (> 0)
     cmp eax, 0
@@ -50,27 +49,26 @@ todo_b:
     ; is odd, or "The number <nr> is even", otherwise.
     
     ; Load the entire 8-byte array as a quad word (64-bit)
-    mov eax, dword [weird]      ; Load lower 32 bits
-    mov edx, dword [weird + 4]  ; Load upper 32 bits
+    mov eax, dword [weird]      ; Load first 32 bits
+    mov edx, dword [weird + 4]  ; Load second 32 bits
     
-    ; Check if odd by testing the least significant bit
-    ; Since we swapped the order, test edx (which now contains the lower bits)
-    test edx, 1
+    ; Check if odd by testing the least significant bit of the lower 32 bits
+    test eax, 1
     jnz is_odd
     
     ; Number is even
-    push eax        ; Push upper 32 bits  
-    push edx        ; Push lower 32 bits
-    push odd_msg
+    push edx        ; Push upper 32 bits
+    push eax        ; Push lower 32 bits
+    push even_msg
     call printf
     add esp, 12
     jmp end_program
     
 is_odd:
     ; Number is odd
-    push eax        ; Push upper 32 bits
-    push edx        ; Push lower 32 bits
-    push even_msg
+    push edx        ; Push upper 32 bits
+    push eax        ; Push lower 32 bits
+    push odd_msg
     call printf
     add esp, 12
 
